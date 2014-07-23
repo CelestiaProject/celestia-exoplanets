@@ -35,7 +35,8 @@ numpy - http://www.numpy.org/
 PLY - http://www.dabeaz.com/ply/
 
 You will also need a Celestia installation as celestia-exoplanets uses the
-data files to determine which stars it needs to output.
+data files to determine which stars it needs to output. Celestia can be
+obtained at http://sourceforge.net/projects/celestia/
 
 The required CSV file exoplanets.csv must be present in the current directory
 when the application is run. It can be obtained from the NASA Exoplanet
@@ -73,6 +74,11 @@ are present in the same system.
 
 CREDITS/ACKNOWLEDGEMENTS
 ------------------------
+This program makes use of the NASA Exoplanet Archive, which is operated by the
+California Institute of Technology, under contract with the National
+Aeronautics and Space Administration under the Exoplanet Exploration Program.
+    http://exoplanetarchive.ipac.caltech.edu/
+
 The following references were used in creating this program. For further
 details, see the output file headers in exoplanets.py
 
