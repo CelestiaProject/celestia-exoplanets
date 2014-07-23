@@ -1,0 +1,96 @@
+celestia-exoplanets: Create an exoplanet catalogue for Celestia
+Copyright (C) 2014  Andrew Tribick
+
+CONTENTS
+--------
+  License
+  Prerequisites
+  Execution
+  Known issues
+  Credits/acknowledgements
+
+LICENSE
+-------
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA  02110-1301, USA.
+
+PREREQUISITES
+-------------
+The application is written in Python 3. In addition to the standard Python 3
+distribution, it requires the following additional libraries:
+
+numpy - http://www.numpy.org/
+PLY - http://www.dabeaz.com/ply/
+
+You will also need a Celestia installation as celestia-exoplanets uses the
+data files to determine which stars it needs to output.
+
+The required CSV file exoplanets.csv must be present in the current directory
+when the application is run. It can be obtained from the NASA Exoplanet
+Archive at the following URL:
+
+http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&select=ra,dec,hd_name,hip_name,st_dist,st_h,st_j,st_k,st_mass,st_plx,st_plxerr,st_rad,st_spstr,st_teff,st_vj,pl_hostname,pl_letter,pl_masse,pl_msinie,pl_name,pl_orbeccen,pl_orbincl,pl_orblper,pl_orbper,pl_orbsmax,pl_orbtper,pl_rade,pl_tranflag,pl_tranmid
+
+EXECUTION
+---------
+This is a command line application which takes one parameter, the path to the
+directory containing Celestia. Usage:
+
+python3 exoplanets.py --celestia-dir=<path_to_celestia>
+
+Note that this should be the root of the Celestia installation, not the data
+directory.
+
+The output files (extrasolar.ssc, extrasolar.stc) will be written to the
+current directory. From there they can be copied into the Celestia
+installation folder.
+
+KNOWN ISSUES
+------------
+The application currently does not have any way to represent binary and
+multiple star systems, this is particularly noticeable for circumbinary
+planets which have their host binaries implemented as a single star.
+
+Planetary systems are currently not treated as single units, therefore the
+order of planets generated (and hence the operation of the number keys in
+Celestia) depends on the order in the CSV file, not on the order of distance
+from the star. It also does not consider other planets in the same system when
+filling in unknown orbit orientation parameters: this can lead to extreme
+misalignments between planets if both transiting and non-transiting planets
+are present in the same system.
+
+CREDITS/ACKNOWLEDGEMENTS
+------------------------
+The following references were used in creating this program. For further
+details, see the output file headers in exoplanets.py
+
+Bilir et al. (2008) "Transformations between 2Mass, SDSS and BVRI
+    photometric systems: bridging the near-infrared and optical",
+    MNRAS v384, p1178-1188
+
+Lissauer et al. (2011) "Architecture and Dynamics of Kepler's Candidate
+    Multiple Transiting Planet Systems", ApJ Supplement v197, article id. 8
+
+Reed, B. C. (1998) "The Composite Observational-Theoretical HR Diagram",
+    Journal of the Royal Astronomical Society of Canada, v92, p36
+    
+The Python, numpy and PLY documentation was of course very useful in creating
+this program.
+
+Thanks goes to Grant Hutchison who previously maintained the extrasolar
+planet and host star catalogues. Without his efforts Celestia would be a far
+less rich environment. His orbit transformation spreadsheets were invaluable
+in verifying the code to process orbital elements, and several decisions in
+the output of the script were inspired by his extrasolar planets files.
