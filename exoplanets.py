@@ -307,16 +307,16 @@ def out_star(f, row, hip, hostname, star_names):
     
     if row['st_spstr'] == '':
         f.write('\tSpectralType "?"\n')
-        if row['st_teff'] != '':
-            f.write('\tTemperature ' + row['st_teff'] + '\n')
-        if bolo_correct is not None:
-            f.write('\tBoloCorrection {0:0.2f}\n'.format(bolo_correct))
     else:
         if row['st_spstr'] == 'WD':
             f.write('\tSpectralType "D"\n')
         else:
             f.write('\tSpectralType "' + row['st_spstr'] + '"\n')
-    
+    if row['st_teff'] != '':
+        f.write('\tTemperature ' + row['st_teff'] + '\n')
+    if bolo_correct is not None:
+        f.write('\tBoloCorrection {0:0.2f}\n'.format(bolo_correct))
+
     if row['st_rad'] != '':
         f.write('\tRadius<rS> ' + row['st_rad'] + '\n')
     
