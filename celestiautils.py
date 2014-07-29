@@ -18,6 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+import os.path
+import struct
 import ply.lex as lex
 import ply.yacc as yacc
 
@@ -54,6 +56,7 @@ class StcLexer:
     """
     
     def __init__(self, **kwargs):
+        """Create a new StcLexer with the given keyword arguments."""
         self.lexer = lex.lex(module=self, **kwargs)
 
     # List of token names
@@ -158,6 +161,7 @@ class StcParser:
     """
     
     def __init__(self, lexer=None, **kwargs):
+        """Create a new StcParser with option to supply an external lexer."""
         if lexer is None:
             self.lexer = StcLexer().lexer
         else:
@@ -291,3 +295,69 @@ class StcParser:
         if lexer is None:
             lexer = self.lexer
         return self.parser.parse(data, lexer=lexer, *args, **kwargs)
+
+
+class StarDatabase:
+    """Manages the star database"""
+    
+    def __init__(self):
+        """Creates a new star database"""
+        self.hip_stars = set()
+        self.star_names = dict()
+    
+    def parse_files(self, file_list):
+        """Parse the given file list"""
+        for filename in file_list:
+            basename = os.path.basename(filename)
+            if basename == 'hdxindex.dat':
+                self.parse_hdxindex(filename)
+            elif basename == 'starnames.dat':
+                self.parse_starnames(filename)
+            elif basename == 'stars.dat':
+                self.parse_stars_dat(filename)
+            else:
+                extension = os.path.splitext(filename)[-1]
+                if extension == '.stc':
+                    self.parse_stc_file(filename)
+    
+    def parse_stars_dat(self, filename):
+        """Extracts the HIP numbers from the stars.dat file."""
+        with open(filename, 'rb') as f:
+            f.seek(14)
+            data = f.read()
+            self.hip_stars |= {struct.unpack('<I', data[pos:pos+4])[0]
+                            for pos in range(0, len(data), 20)}
+
+
+    def parse_starnames(self, filename):
+        """Extracts the star names from starnames.dat"""
+        with open(filename, 'r') as f:
+            for line in f:
+                split_line = line.split(':')
+                hip = int(split_line[0])
+                self.star_names.update({name: hip for name in split_line[1:]})
+
+
+    def parse_hdxindex(self, filename):
+        """Extracts the HD names from hdxindex.dat"""
+        with open(filename, 'rb') as f:
+            f.seek(10)
+            data = f.read()
+            for pos in range(0, len(data), 8):
+                hd, hip = struct.unpack("<II", data[pos:pos+8])
+                self.star_names["HD "+str(hd)] = hip
+
+
+    def parse_stc_file(self, filename, parser=None):
+        """Extracts the HIP numbers from an stc file."""
+        if parser is None:
+            parser = StcParser()
+
+        with open(filename, 'r', encoding='latin-1') as f:
+            stc_stars = parser.parse(f.read())
+            for star in stc_stars:
+                if star["HIP"] is not None:
+                    self.hip_stars.add(star["HIP"])
+                if star["Name"] is not None:
+                    split_names = star["Name"].split(':')
+                    self.star_names.update({name: -1 for name in split_names})

@@ -23,10 +23,9 @@
 
 import csv
 import os.path
-import struct
 import time
 from numpy import arctan2, cos, degrees, log10, pi, radians, sin, sqrt
-from stcparser import StcParser
+from celestiautils import StarDatabase
 from orbitconvert import OrbitElements, OrbitConverter
 from optparse import OptionParser
 
@@ -137,53 +136,6 @@ STC_FILES = [
     'spectbins.stc'
 ]
 
-
-def parse_stars_dat(f):
-    """Extracts the HIP numbers from the stars.dat file."""
-    f.seek(14)
-    data = f.read()
-    hip_stars = {struct.unpack('<I', data[pos:pos+4])[0]
-                 for pos in range(0, len(data), 20)}
-    return hip_stars
-
-
-def parse_starnames(f):
-    """Extracts the star names from starnames.dat"""
-    star_names = dict()
-    for line in f:
-        split_line = line.split(':')
-        hip = int(split_line[0])
-        star_names.update({name: hip for name in split_line[1:]})
-    return star_names
-
-
-def parse_hdxindex(f):
-    """Extracts the HD names from hdxindex.dat"""
-    f.seek(10)
-    data = f.read()
-    star_names = dict()
-    for pos in range(0, len(data), 8):
-        hd, hip = struct.unpack("<II", data[pos:pos+8])
-        star_names["HD "+str(hd)] = hip
-    return star_names
-
-
-def parse_stc_file(f, parser=None):
-    """Extracts the HIP numbers from an stc file."""
-    if parser is None:
-        parser = StcParser()
-    stc_stars = parser.parse(f.read())
-    hip_stars = set()
-    star_names = dict()
-    for star in stc_stars:
-        if star["HIP"] is not None:
-            hip_stars.add(star["HIP"])
-        if star["Name"] is not None:
-            split_names = star["Name"].split(':')
-            star_names.update({name: -1 for name in split_names})
-    return hip_stars, star_names
-
-
 def star_ok(row):
     """Checks if all required information to create a star is present."""
     is_ok = True
@@ -227,7 +179,7 @@ def planet_ok(row):
     return is_ok
 
 
-def out_star(f, row, hip, hostname, star_names):
+def out_star(f, row, hip, hostname, stardb):
     """Outputs a star definition to the stc file."""
     if hip is None:
         names = list()
@@ -239,11 +191,11 @@ def out_star(f, row, hip, hostname, star_names):
         f.write('"' + ':'.join(names) + '"\n')
     else:
         names = list()
-        if hostname not in star_names:
+        if hostname not in stardb.star_names:
             names.append(hostname)
         if (row["hd_name"] != '' and
                 row["hd_name"] != hostname and
-                row["hd_name"] not in star_names):
+                row["hd_name"] not in stardb.star_names):
             names.append(hostname)
         f.write(str(hip))
         if len(names) > 0:
@@ -439,30 +391,16 @@ def out_planet(f, row, use_host):
     f.write('}\n\n')
 
 
+stardb = StarDatabase()
+
 data_dir = os.path.join(celestia_path, 'data')
 
 stars_dat = os.path.join(data_dir, 'stars.dat')
-with open(stars_dat, 'rb') as f:
-    hip_stars = parse_stars_dat(f)
-
-
 starnames_dat = os.path.join(data_dir, 'starnames.dat')
-with open(starnames_dat, 'r') as f:
-    star_names = parse_starnames(f)
-    
-
 hdxindex_dat = os.path.join(data_dir, 'hdxindex.dat')
-with open(hdxindex_dat, 'rb') as f:
-    star_names.update(parse_hdxindex(f))
 
-
-parser = StcParser()
-for filename in STC_FILES:
-    stc_file = os.path.join(data_dir, filename)
-    with open(stc_file, 'r', encoding='latin-1') as f:
-        stc_hip, stc_names = parse_stc_file(f, parser)
-        hip_stars |= stc_hip
-        star_names.update(stc_names)
+stardb.parse_files((stars_dat, starnames_dat, hdxindex_dat))
+stardb.parse_files((os.path.join(data_dir, fname) for fname in STC_FILES))
 
 output_stars = set()
 
@@ -486,22 +424,22 @@ with open('exoplanets.csv', 'r') as f, \
         hip = None
         use_host = None
         
-        if host_name in star_names:
-            hip = star_names[host_name]
+        if host_name in stardb.star_names:
+            hip = stardb.star_names[host_name]
             use_host = host_name
-            needs_star = (star_names[host_name] != -1 and
-                          star_names[host_name] not in hip_stars)
-        elif row["hd_name"] in star_names:
-            hip = star_names[row["hd_name"]]
+            needs_star = (stardb.star_names[host_name] != -1 and
+                          stardb.star_names[host_name] not in stardb.hip_stars)
+        elif row["hd_name"] in stardb.star_names:
+            hip = stardb.star_names[row["hd_name"]]
             use_host = row["hd_name"]
-            needs_star = (star_names[row["hd_name"]] != -1 and
-                          star_names[row["hd_name"]] not in hip_stars)
+            needs_star = (stardb.star_names[row["hd_name"]] != -1 and
+                stardb.star_names[row["hd_name"]] not in stardb.hip_stars)
         elif row["hip_name"] != '':
             split_hip = row["hip_name"].split(' ')
             if len(split_hip) == 2 or split_hip[2] == 'A':
                 hip = int(split_hip[1])
                 use_host = "HIP " + str(hip)
-                needs_star = hip not in hip_stars
+                needs_star = hip not in stardb.hip_stars
             else:
                 use_host = row["hip_name"]
                 needs_star = True
@@ -515,6 +453,6 @@ with open('exoplanets.csv', 'r') as f, \
             print("Missing parameters for exoplanet", row["pl_name"])
         else:
             if needs_star and row["pl_hostname"] not in output_stars:
-                out_star(out_stars, row, hip, host_name, star_names)
+                out_star(out_stars, row, hip, host_name, stardb)
                 output_stars.add(row["pl_hostname"])
             out_planet(out_planets, row, use_host)
