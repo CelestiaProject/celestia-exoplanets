@@ -20,6 +20,7 @@
 
 import os.path
 import struct
+import re
 import ply.lex as lex
 import ply.yacc as yacc
 
@@ -27,8 +28,8 @@ reserved_words = {
     'Barycenter': 'BARYCENTER',
     'Add': 'DISPOSITION',
     'Modify': 'DISPOSITION',
-    'Replace': 'DISPOSITION'
-}
+    'Replace': 'DISPOSITION',
+    }
 
 STC_TOKENS = (
     'DISPOSITION',
@@ -46,8 +47,8 @@ STC_TOKENS = (
     'ESCAPE',
     'BACKSLASH',
     'NEWLINE',
-    'UNICODE'
-)
+    'UNICODE',
+    )
 
 class StcLexer:
     """Lexer for STC files.
@@ -65,8 +66,8 @@ class StcLexer:
     # List of states
     states = (
         ('string', 'exclusive'),
-        ('escape', 'exclusive')
-    )
+        ('escape', 'exclusive'),
+        )
     
     t_LBRACE = r'\{'
     t_RBRACE = r'\}'
@@ -229,7 +230,7 @@ class StcParser:
         '''rules :
                  | rules rule'''
         if len(p) == 1:
-            p[0] = dict()
+            p[0] = {}
         else:
             p[1].update(p[2])
             p[0] = p[1]
@@ -303,7 +304,7 @@ class StarDatabase:
     def __init__(self):
         """Creates a new star database"""
         self.hip_stars = set()
-        self.star_names = dict()
+        self.star_names = {}
     
     def parse_files(self, file_list):
         """Parse the given file list"""
@@ -325,17 +326,21 @@ class StarDatabase:
         with open(filename, 'rb') as f:
             f.seek(14)
             data = f.read()
-            self.hip_stars |= {struct.unpack('<I', data[pos:pos+4])[0]
-                            for pos in range(0, len(data), 20)}
+            self.hip_stars |= {
+                struct.unpack('<I', data[pos:pos+4])[0]
+                for pos in range(0, len(data), 20)
+                }
 
 
     def parse_starnames(self, filename):
         """Extracts the star names from starnames.dat"""
         with open(filename, 'r') as f:
             for line in f:
+                line = line.strip()
                 split_line = line.split(':')
                 hip = int(split_line[0])
-                self.star_names.update({name: hip for name in split_line[1:]})
+                self.star_names.update({name: (hip, False)
+                                        for name in split_line[1:]})
 
 
     def parse_hdxindex(self, filename):
@@ -345,7 +350,7 @@ class StarDatabase:
             data = f.read()
             for pos in range(0, len(data), 8):
                 hd, hip = struct.unpack("<II", data[pos:pos+8])
-                self.star_names["HD "+str(hd)] = hip
+                self.star_names["HD "+str(hd)] = hip, True
 
 
     def parse_stc_file(self, filename, parser=None):
@@ -360,4 +365,26 @@ class StarDatabase:
                     self.hip_stars.add(star["HIP"])
                 if star["Name"] is not None:
                     split_names = star["Name"].split(':')
-                    self.star_names.update({name: -1 for name in split_names})
+                    self.star_names.update({name: (-1, False)
+                                            for name in split_names})
+
+    
+    def lookup_name(self, name):
+        """Looks up a name in the star database."""
+        if name in self.star_names:
+            return self.star_names[name][0]
+        m = re.match('^HIP ([0-9]+)$', name)
+        if m:
+            return int(m.group(1))
+        else:
+            return None
+    
+    def is_catalog_name(self, name):
+        """Checks if the name in question is from the cross-index"""
+        if name in self.star_names:
+            return self.star_names[name][1]
+        m = re.match('^HIP ([0-9]+)$', name)
+        if m:
+            return True
+        else:
+            return False

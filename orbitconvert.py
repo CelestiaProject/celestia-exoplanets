@@ -35,7 +35,8 @@ def rotation_x(angle):
     return np.matrix((
         (1, 0, 0),
         (0, c, -s),
-        (0, s, c)))
+        (0, s, c),
+        ))
 
 def rotation_y(angle):
     c = cos(radians(angle))
@@ -43,7 +44,8 @@ def rotation_y(angle):
     return np.matrix((
         (c, 0, s),
         (0, 1, 0),
-        (-s, 0, c)))
+        (-s, 0, c),
+        ))
 
 def rotation_z(angle):
     c = cos(radians(angle))
@@ -51,7 +53,8 @@ def rotation_z(angle):
     return np.matrix((
         (c, -s, 0),
         (s, c, 0),
-        (0, 0, 1)))
+        (0, 0, 1),
+        ))
 
 class OrbitElements:
     """Contains orbital elements"""
@@ -78,7 +81,8 @@ class OrbitElements:
             'OrbitElements(arg_peri={0!r}, inclination={1!r}, node={2!r})',
             self.arg_peri,
             self.inclination,
-            self.node)
+            self.node,
+            )
 
 
 class OrbitConverter:
@@ -92,8 +96,8 @@ class OrbitConverter:
         self._transform = (
             rotation_x(-OBLIQUITY) *
             rotation_z(ra) *
-            rotation_y(-dec - 90)
-        )
+            rotation_y(-dec - 90),
+            )
 
     def transform(self, elements):
         """Converts a set of orbital elements from the sky plane to the
@@ -102,7 +106,7 @@ class OrbitConverter:
             rotation_z(elements.node) *
             rotation_x(-elements.inclination) * 
             rotation_z(elements.arg_peri)
-        )
+            )
 
         ecl_matrix = self._transform * sky_matrix
         
@@ -144,4 +148,5 @@ class OrbitConverter:
         return str.format(
             'OrbitConverter(ra={3!r}, dec={4!r})',
             self._ra,
-            self._dec)
+            self._dec,
+            )
