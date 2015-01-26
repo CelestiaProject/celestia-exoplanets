@@ -38,6 +38,7 @@ def rotation_x(angle):
         (0, s, c),
         ))
 
+
 def rotation_y(angle):
     c = cos(radians(angle))
     s = sin(radians(angle))
@@ -47,6 +48,7 @@ def rotation_y(angle):
         (-s, 0, c),
         ))
 
+
 def rotation_z(angle):
     c = cos(radians(angle))
     s = sin(radians(angle))
@@ -55,6 +57,7 @@ def rotation_z(angle):
         (s, c, 0),
         (0, 0, 1),
         ))
+
 
 class OrbitElements:
     """Contains orbital elements"""
@@ -75,7 +78,8 @@ class OrbitElements:
             while node > 360:
                 node -= 360
         self.node = node
-        
+
+
     def __repr__(self):
         return str.format(
             'OrbitElements(arg_peri={0!r}, inclination={1!r}, node={2!r})',
@@ -98,6 +102,7 @@ class OrbitConverter:
             rotation_z(ra) *
             rotation_y(-dec - 90),
             )
+
 
     def transform(self, elements):
         """Converts a set of orbital elements from the sky plane to the
@@ -126,6 +131,7 @@ class OrbitConverter:
             node = degrees(arctan2(ecl_matrix[0, 2], -ecl_matrix[1, 2]))
         return OrbitElements(arg_peri, inclination, node)
 
+
     def ecliptic_plane(self):
         """Gets the inclination and node of the ecliptic plane in the sky
         frame."""
@@ -136,13 +142,16 @@ class OrbitConverter:
             node -= 360
         return OrbitElements(None, inclination, node)
 
+
     @property
     def ra(self):
         return _ra
-    
+
+
     @property
     def dec(self):
         return _dec
+
 
     def __repr__(self):
         return str.format(
