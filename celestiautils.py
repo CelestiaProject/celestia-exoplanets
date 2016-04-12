@@ -18,11 +18,15 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA  02110-1301, USA.
 
+
+from __future__ import print_function
+
 import os.path
 import struct
 import re
 import ply.lex as lex
 import ply.yacc as yacc
+from io import open
 
 reserved_words = {
     'Barycenter': 'BARYCENTER',
@@ -50,7 +54,7 @@ STC_TOKENS = (
     'UNICODE',
     )
 
-class StcLexer:
+class StcLexer(object):
     """Lexer for STC files.
     
     This class should be used in conjuction with the StcParser.
@@ -151,7 +155,7 @@ class StcLexer:
         t.lexer.skip(1)
 
 
-class StcParser:
+class StcParser(object):
     """Parser for STC files.
     
     This class should be used in conjunction with the StcLexer.
@@ -298,7 +302,7 @@ class StcParser:
         return self.parser.parse(data, lexer=lexer, *args, **kwargs)
 
 
-class StarDatabase:
+class StarDatabase(object):
     """Manages the star database"""
     
     def __init__(self):

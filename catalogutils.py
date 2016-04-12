@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 
+from __future__ import division
+
 import csv
 import re
 from numpy import log10, pi, sqrt
@@ -101,7 +103,7 @@ def kepler3_period(semimajor, stmass):
     return round(sqrt(4 * (pi**2) * (semimajor**3) / (2.95995e-4*stmass)), 3)
 
 
-class NasaCatalog:
+class NasaCatalog(object):
     """Class to handle the NASA Exoplanet Database"""
     
     def __init__(self, stardb):

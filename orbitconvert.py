@@ -59,7 +59,7 @@ def rotation_z(angle):
         ))
 
 
-class OrbitElements:
+class OrbitElements(object):
     """Contains orbital elements"""
 
     def __init__(self, arg_peri, inclination, node):
@@ -89,7 +89,7 @@ class OrbitElements:
             )
 
 
-class OrbitConverter:
+class OrbitConverter(object):
     """Provides transformations for orbital elements between the sky plane and
     the ecliptic frames."""
     
