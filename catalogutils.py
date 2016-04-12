@@ -183,10 +183,12 @@ class NasaCatalog:
 
         if row['st_dist']:
             star_data['dist'] = float(row['st_dist'])
-        elif (row['st_plx'] and row['st_plxerr'] and
-            float(row['st_plx']) > float(row['st_plxerr'])):
-            star_data['dist'] = round(1000/float(row['st_plx']), 0)
-            star_data['#dist'] = 'from parallax value'
+        elif row['st_plx'] and row['st_plxerr1']:
+            plx = float(row['st_plx'])
+            plxerr = float(row['st_plxerr2']) if row['st_plxerr2'] else float(row['st_plxerr1'])
+            if plx > abs(plxerr):
+                star_data['dist'] = round(1000/float(row['st_plx']), 0)
+                star_data['#dist'] = 'from parallax value'
         elif 'magV' in star_data and 'rad' in star_data and 'teff' in star_data:
             star_data['dist'] = mag_to_distance(star_data['magV'],
                                                 star_data['rad'],
