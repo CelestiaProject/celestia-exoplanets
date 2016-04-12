@@ -4,3 +4,4 @@ extrasolar.ssc
 extrasolar.stc
 parser.out
 parsetab.py
+*.pyc
