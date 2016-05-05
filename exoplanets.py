@@ -251,7 +251,7 @@ def output_planet(f, planet, star):
             ))
         arg_peri = planet['arg_peri'] if 'arg_peri' in planet else 0
         ecc = planet['e'] if 'e' in planet else 0
-        f.write('\t\tMeanAnomaly {0:.3f}\n'.format(
+        f.write('\t\tMeanAnomaly<deg> {0:.3f}\n'.format(
             transit_anomaly(arg_peri, ecc)))
         pass
     elif 't_peri' in planet:
