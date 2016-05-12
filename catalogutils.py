@@ -235,7 +235,7 @@ class NasaCatalog(object):
             planet_data['P'] = kepler3_period(planet_data['a'], star_data['mass'])
             planet_data['#P'] = "from Kepler's 3rd law"
 
-        if row['pl_orbeccen']:
+        if row['pl_orbeccen'] and not (row['pl_orbeccenlim'] and row['pl_orbeccenlim'] == '1'):
             planet_data['e'] = float(row['pl_orbeccen'])
 
         if row['pl_orblper']:
