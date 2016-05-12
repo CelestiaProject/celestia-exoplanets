@@ -209,18 +209,24 @@ class NasaCatalog(object):
     def create_planet(self, row, star_data):
         """Create a planet data record."""
         planet_data = {'name': row['pl_letter']}
-        
-        if row['pl_masse']:
+
+        if row['pl_masse'] and row['pl_masselim'] != '1':
             planet_data['mass'] = float(row['pl_masse'])
-        elif row['pl_msinie']:
+            if row['pl_masselim'] == '-1':
+                planet_data['#mass'] = 'lower limit'
+
+        elif row['pl_msinie'] and row['pl_msinielim'] != '1':
             planet_data['mass'] = float(row['pl_msinie'])
             planet_data['#mass'] = 'minimum mass'
-        
-        if row['pl_rade']:
+
+        if row['pl_rade'] and row['pl_radelim'] != '1':
             planet_data['rad'] = float(row['pl_rade'])
         elif 'mass' in planet_data:
             planet_data['rad'] = mass_to_radius(planet_data['mass'])
             planet_data['#rad'] = 'from mass-radius relationship'
+            if row['pl_rade'] and planet_data['rad'] > float(row['pl_rade']):
+                planet_data['rad'] = float(row['pl_rade'])
+                planet_data['#rad'] = 'from mass-radius relationship and upper limit'
 
         if row['pl_orbsmax']:
             planet_data['a'] = float(row['pl_orbsmax'])
@@ -235,7 +241,7 @@ class NasaCatalog(object):
             planet_data['P'] = kepler3_period(planet_data['a'], star_data['mass'])
             planet_data['#P'] = "from Kepler's 3rd law"
 
-        if row['pl_orbeccen'] and not (row['pl_orbeccenlim'] and row['pl_orbeccenlim'] == '1'):
+        if row['pl_orbeccen'] and row['pl_orbeccenlim'] != '1':
             planet_data['e'] = float(row['pl_orbeccen'])
 
         if row['pl_orblper']:

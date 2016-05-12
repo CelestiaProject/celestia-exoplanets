@@ -42,7 +42,7 @@ The required CSV file exoplanets.csv must be present in the current directory
 when the application is run. It can be obtained from the NASA Exoplanet
 Archive at the following URL:
 
-http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&select=ra,dec,hd_name,hip_name,st_dist,st_h,st_j,st_k,st_mass,st_plx,st_plxerr1,st_plxerr2,st_rad,st_spstr,st_teff,st_vj,pl_hostname,pl_letter,pl_masse,pl_msinie,pl_name,pl_orbeccen,pl_orbeccenlim,pl_orbincl,pl_orblper,pl_orbper,pl_orbsmax,pl_orbtper,pl_rade,pl_tranflag,pl_tranmid
+http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&select=ra,dec,hd_name,hip_name,st_dist,st_h,st_j,st_k,st_mass,st_plx,st_plxerr1,st_plxerr2,st_rad,st_spstr,st_teff,st_vj,pl_hostname,pl_letter,pl_masse,pl_masselim,pl_msinie,pl_msinielim,pl_name,pl_orbeccen,pl_orbeccenlim,pl_orbincl,pl_orblper,pl_orbper,pl_orbsmax,pl_orbtper,pl_rade,pl_radelim,pl_tranflag,pl_tranmid
 
 EXECUTION
 ---------
