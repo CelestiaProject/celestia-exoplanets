@@ -155,7 +155,7 @@ class OrbitConverter(object):
 
     def __repr__(self):
         return str.format(
-            'OrbitConverter(ra={3!r}, dec={4!r})',
+            'OrbitConverter(ra={0!r}, dec={1!r})',
             self._ra,
             self._dec,
             )
