@@ -1,6 +1,10 @@
 celestia-exoplanets: Create an exoplanet catalogue for Celestia
 Copyright (C) 2014  Andrew Tribick
 
+Apologies for the lack of updates to this code. My current focus
+with this is to incorporate it into Celestia.Sci. As such, I will
+likely not be making further changes to this repository.
+
 CONTENTS
 --------
   License
